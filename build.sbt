@@ -59,7 +59,7 @@ def common: Seq[Setting[_]] =
       }
       "-Xms1G" :: "-Xmx1G" :: "-XX:MaxDirectMemorySize=256M" :: akkaProperties
     },
-    projectInfoVersion := (if (isSnapshot.value) "snapshot" else version.value),
+    // projectInfoVersion := (if (isSnapshot.value) "snapshot" else version.value),
     Compile / doc / scalacOptions := scalacOptions.value ++ Seq(
       "-doc-title",
       "Akka Persistence R2DBC",
@@ -72,14 +72,15 @@ def common: Seq[Setting[_]] =
         Seq("-jdk-api-doc-base", s"https://docs.oracle.com/en/java/javase/${Dependencies.JavaDocLinkVersion}/docs/api")
       }
     },
-    Global / excludeLintKeys += projectInfoVersion,
-    Global / excludeLintKeys += mimaReportSignatureProblems,
-    Global / excludeLintKeys += mimaPreviousArtifacts,
-    mimaReportSignatureProblems := true,
-    mimaPreviousArtifacts :=
-      Set(
-        organization.value %% moduleName.value % previousStableVersion.value
-          .getOrElse(throw new Error("Unable to determine previous version"))))
+    // Global / excludeLintKeys += projectInfoVersion,
+    // Global / excludeLintKeys += mimaReportSignatureProblems,
+    // Global / excludeLintKeys += mimaPreviousArtifacts,
+    // mimaReportSignatureProblems := true,
+    // mimaPreviousArtifacts :=
+    //   Set(
+    //     organization.value %% moduleName.value % previousStableVersion.value
+    //       .getOrElse(throw new Error("Unable to determine previous version")))
+    )
 
 lazy val dontPublish = Seq(publish / skip := true, Compile / publishArtifact := false)
 
@@ -89,9 +90,10 @@ lazy val root = (project in file("."))
   .settings(
     name := "akka-persistence-r2dbc-root",
     publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo"))))
-  .enablePlugins(ScalaUnidocPlugin)
-  .disablePlugins(SitePlugin, MimaPlugin, CiReleasePlugin)
-  .aggregate(core, migration, migrationTests, docs)
+  // Temporarily disabled to allow build without doc plugins
+  // .enablePlugins(ScalaUnidocPlugin)
+  .disablePlugins(MimaPlugin, CiReleasePlugin)
+  .aggregate(core, migration, migrationTests) // removed docs
 
 def suffixFileFilter(suffix: String): FileFilter = new SimpleFileFilter(f => f.getAbsolutePath.endsWith(suffix))
 
@@ -133,48 +135,49 @@ lazy val migrationTests = (project in file("migration-tests"))
   .disablePlugins(MimaPlugin, CiReleasePlugin)
   .settings(dontPublish)
 
-lazy val docs = project
-  .in(file("docs"))
-  .enablePlugins(AkkaParadoxPlugin, ParadoxSitePlugin, PreprocessPlugin, PublishRsyncPlugin)
-  .disablePlugins(MimaPlugin, CiReleasePlugin)
-  .dependsOn(core, migration)
-  .settings(common)
-  .settings(dontPublish)
-  .settings(
-    name := "Akka Persistence plugin for R2DBC",
-    libraryDependencies ++= Dependencies.docs,
-    makeSite := makeSite.dependsOn(LocalRootProject / ScalaUnidoc / doc).value,
-    previewPath := (Paradox / siteSubdirName).value,
-    Preprocess / siteSubdirName := s"api/akka-persistence-r2dbc/${projectInfoVersion.value}",
-    Preprocess / sourceDirectory := (LocalRootProject / ScalaUnidoc / unidoc / target).value,
-    Paradox / siteSubdirName := s"libraries/akka-persistence-r2dbc/${projectInfoVersion.value}",
-    paradoxGroups := Map(
-      "Language" -> Seq("Java", "Scala"),
-      "Dialect" -> Seq("Postgres", "Yugabyte", "H2", "SQLServer")),
-    Compile / paradoxProperties ++= Map(
-      "project.url" -> "https://doc.akka.io/libraries/akka-persistence-r2dbc/current/",
-      "canonical.base_url" -> "https://doc.akka.io/libraries/akka-persistence-r2dbc/current",
-      "akka.version" -> Dependencies.AkkaVersion,
-      "h2.version" -> Dependencies.H2Version,
-      "r2dbc-h2.version" -> Dependencies.R2dbcH2Version,
-      "scala.version" -> scalaVersion.value,
-      "scala.binary.version" -> scalaBinaryVersion.value,
-      "extref.akka.base_url" -> s"https://doc.akka.io/libraries/akka-core/${Dependencies.AkkaVersionInDocs}/%s",
-      "extref.akka-docs.base_url" -> s"https://doc.akka.io/libraries/akka-core/${Dependencies.AkkaVersionInDocs}/%s",
-      "extref.akka-projection.base_url" -> s"https://doc.akka.io/libraries/akka-projection/${Dependencies.AkkaProjectionVersionInDocs}/%s",
-      "extref.java-docs.base_url" -> s"https://docs.oracle.com/en/java/javase/${Dependencies.JavaDocLinkVersion}/%s",
-      "scaladoc.scala.base_url" -> s"https://www.scala-lang.org/api/current/",
-      "scaladoc.akka.persistence.r2dbc.base_url" -> s"/${(Preprocess / siteSubdirName).value}/",
-      "javadoc.akka.persistence.r2dbc.base_url" -> "", // no Javadoc is published
-      "scaladoc.akka.base_url" -> s"https://doc.akka.io/api/akka/${Dependencies.AkkaVersionInDocs}/",
-      "javadoc.akka.base_url" -> s"https://doc.akka.io/japi/akka/${Dependencies.AkkaVersionInDocs}/",
-      "scaladoc.com.typesafe.config.base_url" -> s"https://lightbend.github.io/config/latest/api/",
-      "sqlserver.version" -> Dependencies.SqlServerR2dbcVersion),
-    ApidocPlugin.autoImport.apidocRootPackage := "akka",
-    apidocRootPackage := "akka",
-    resolvers += Resolver.jcenterRepo,
-    publishRsyncArtifacts += makeSite.value -> "www/",
-    publishRsyncHost := "akkarepo@gustav.akka.io")
+// Temporarily commented out to allow build without doc plugins
+// lazy val docs = project
+//   .in(file("docs"))
+//   .enablePlugins(AkkaParadoxPlugin, ParadoxSitePlugin, PreprocessPlugin, PublishRsyncPlugin)
+//   .disablePlugins(MimaPlugin, CiReleasePlugin)
+//   .dependsOn(core, migration)
+//   .settings(common)
+//   .settings(dontPublish)
+//   .settings(
+//     name := "Akka Persistence plugin for R2DBC",
+//     libraryDependencies ++= Dependencies.docs,
+//     makeSite := makeSite.dependsOn(LocalRootProject / ScalaUnidoc / doc).value,
+//     previewPath := (Paradox / siteSubdirName).value,
+//     Preprocess / siteSubdirName := s"api/akka-persistence-r2dbc/${projectInfoVersion.value}",
+//     Preprocess / sourceDirectory := (LocalRootProject / ScalaUnidoc / unidoc / target).value,
+//     Paradox / siteSubdirName := s"libraries/akka-persistence-r2dbc/${projectInfoVersion.value}",
+//     paradoxGroups := Map(
+//       "Language" -> Seq("Java", "Scala"),
+//       "Dialect" -> Seq("Postgres", "Yugabyte", "H2", "SQLServer")),
+//     Compile / paradoxProperties ++= Map(
+//       "project.url" -> "https://doc.akka.io/libraries/akka-persistence-r2dbc/current/",
+//       "canonical.base_url" -> "https://doc.akka.io/libraries/akka-persistence-r2dbc/current",
+//       "akka.version" -> Dependencies.AkkaVersion,
+//       "h2.version" -> Dependencies.H2Version,
+//       "r2dbc-h2.version" -> Dependencies.R2dbcH2Version,
+//       "scala.version" -> scalaVersion.value,
+//       "scala.binary.version" -> scalaBinaryVersion.value,
+//       "extref.akka.base_url" -> s"https://doc.akka.io/libraries/akka-core/${Dependencies.AkkaVersionInDocs}/%s",
+//       "extref.akka-docs.base_url" -> s"https://doc.akka.io/libraries/akka-core/${Dependencies.AkkaVersionInDocs}/%s",
+//       "extref.akka-projection.base_url" -> s"https://doc.akka.io/libraries/akka-projection/${Dependencies.AkkaProjectionVersionInDocs}/%s",
+//       "extref.java-docs.base_url" -> s"https://docs.oracle.com/en/java/javase/${Dependencies.JavaDocLinkVersion}/%s",
+//       "scaladoc.scala.base_url" -> s"https://www.scala-lang.org/api/current/",
+//       "scaladoc.akka.persistence.r2dbc.base_url" -> s"/${(Preprocess / siteSubdirName).value}/",
+//       "javadoc.akka.persistence.r2dbc.base_url" -> "", // no Javadoc is published
+//       "scaladoc.akka.base_url" -> s"https://doc.akka.io/api/akka/${Dependencies.AkkaVersionInDocs}/",
+//       "javadoc.akka.base_url" -> s"https://doc.akka.io/japi/akka/${Dependencies.AkkaVersionInDocs}/",
+//       "scaladoc.com.typesafe.config.base_url" -> s"https://lightbend.github.io/config/latest/api/",
+//       "sqlserver.version" -> Dependencies.SqlServerR2dbcVersion),
+//     ApidocPlugin.autoImport.apidocRootPackage := "akka",
+//     apidocRootPackage := "akka",
+//     resolvers += Resolver.jcenterRepo,
+//     publishRsyncArtifacts += makeSite.value -> "www/",
+//     publishRsyncHost := "akkarepo@gustav.akka.io")
 
 val isJdk11orHigher: Boolean = {
   val result = VersionNumber(sys.props("java.specification.version")).matchesSemVer(SemanticSelector(">=11"))

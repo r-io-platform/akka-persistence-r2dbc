@@ -16,3 +16,5 @@ ext-lib-src/
 .classpath_nb
 .bsp
 metals.sbt
+
+.lightbend-commercial-credentials-token

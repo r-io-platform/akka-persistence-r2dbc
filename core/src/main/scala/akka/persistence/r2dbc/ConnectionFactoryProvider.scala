@@ -14,6 +14,7 @@ import akka.persistence.r2dbc.internal.R2dbcExecutor
 import io.r2dbc.pool.ConnectionPool
 import io.r2dbc.pool.ConnectionPoolConfiguration
 import io.r2dbc.spi.ConnectionFactory
+import reactor.core.scheduler.Schedulers
 import java.time.{ Duration => JDuration }
 import java.util.concurrent.ConcurrentHashMap
 
@@ -147,6 +148,18 @@ class ConnectionFactoryProvider(system: ActorSystem[_]) extends Extension {
 
     if (settings.validationQuery.nonEmpty)
       poolConfiguration.validationQuery(settings.validationQuery)
+
+    // Configure the scheduler used for connection allocation
+    val scheduler = settings.allocatorSubscribeOn.toLowerCase match {
+      case "parallel"       => Schedulers.parallel()
+      case "single"         => Schedulers.single()
+      case "immediate"      => Schedulers.immediate()
+      case "boundedelastic" => Schedulers.boundedElastic()
+      case other =>
+        throw new IllegalArgumentException(
+          s"Invalid allocator-subscribe-on value: '$other'. Must be one of: parallel, single, immediate, boundedElastic")
+    }
+    poolConfiguration.allocatorSubscribeOn(scheduler)
 
     val pool = new ConnectionPool(poolConfiguration.build())
 

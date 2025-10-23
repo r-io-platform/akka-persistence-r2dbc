@@ -527,6 +527,10 @@ final class ConnectionPoolSettings(config: Config) {
   val validationQuery: String = config.getString("validation-query")
 
   val closeCallsExceeding: Option[FiniteDuration] = config.optDuration("close-calls-exceeding")
+
+  val allocatorSubscribeOn: String =
+    if (config.hasPath("allocator-subscribe-on")) config.getString("allocator-subscribe-on")
+    else "single"
 }
 
 /**

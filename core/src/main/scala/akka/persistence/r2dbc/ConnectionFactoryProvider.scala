@@ -29,8 +29,11 @@ import io.r2dbc.spi.ConnectionFactoryOptions
 
 import akka.annotation.InternalApi
 import akka.annotation.InternalStableApi
+import org.slf4j.LoggerFactory
 
 object ConnectionFactoryProvider extends ExtensionId[ConnectionFactoryProvider] {
+  private val log = LoggerFactory.getLogger(getClass)
+
   def createExtension(system: ActorSystem[_]): ConnectionFactoryProvider = new ConnectionFactoryProvider(system)
 
   // Java API
@@ -150,6 +153,8 @@ class ConnectionFactoryProvider(system: ActorSystem[_]) extends Extension {
       poolConfiguration.validationQuery(settings.validationQuery)
 
     // Configure the scheduler used for connection allocation
+    ConnectionFactoryProvider.log.info(
+      s"Configuring R2DBC connection pool with allocator-subscribe-on: ${settings.allocatorSubscribeOn}")
     val scheduler = settings.allocatorSubscribeOn.toLowerCase match {
       case "parallel"       => Schedulers.parallel()
       case "single"         => Schedulers.single()
@@ -159,6 +164,7 @@ class ConnectionFactoryProvider(system: ActorSystem[_]) extends Extension {
         throw new IllegalArgumentException(
           s"Invalid allocator-subscribe-on value: '$other'. Must be one of: parallel, single, immediate, boundedElastic")
     }
+    ConnectionFactoryProvider.log.info(s"Applied ${scheduler.getClass.getName} scheduler to R2DBC connection pool")
     poolConfiguration.allocatorSubscribeOn(scheduler)
 
     val pool = new ConnectionPool(poolConfiguration.build())

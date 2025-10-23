@@ -39,14 +39,11 @@ object Publish extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
-    sonatypeProfileName := "com.lightbend",
+    sonatypeProfileName := "io.reflek",
     beforePublishTask := beforePublish(isSnapshot.value),
     publishSigned := publishSigned.dependsOn(beforePublishTask).value,
     publishTo :=
-      (if (isSnapshot.value)
-         Some("Cloudsmith API".at("https://maven.cloudsmith.io/lightbend/akka-snapshots/"))
-       else
-         Some("Cloudsmith API".at("https://maven.cloudsmith.io/lightbend/akka/"))),
+      Some("Reflek Artifact Repository".at("artifactregistry://europe-west1-maven.pkg.dev/prj-rio-operation-259855/reflek-io-maven-internal")),
     credentials ++= cloudsmithCredentials(validate = false))
 
   def cloudsmithCredentials(validate: Boolean): Seq[Credentials] = {

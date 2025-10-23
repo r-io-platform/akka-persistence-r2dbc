@@ -8,9 +8,11 @@ Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
 
 inThisBuild(
   Seq(
-    organization := "com.lightbend.akka",
-    organizationName := "Lightbend Inc.",
-    homepage := Some(url("https://doc.akka.io/libraries/akka-persistence-r2dbc/current")),
+    organization := "io.reflek",
+    organizationName := "Reflek Inc.",
+    // Custom version for Reflek fork with connection pool scheduler fix
+    version := "1.2.5-reflek-scheduler-fix",
+    homepage := Some(url("https://github.com/akka/akka-persistence-r2dbc")),
     scmInfo := Some(
       ScmInfo(
         url("https://github.com/akka/akka-persistence-r2dbc"),
@@ -21,14 +23,11 @@ inThisBuild(
       "Contributors",
       "akka.official@gmail.com",
       url("https://github.com/akka/akka-persistence-r2dbc/graphs/contributors")),
-    releaseNotesURL := (
-      if (isSnapshot.value) None
-      else Some(url(s"https://github.com/akka/akka-persistence-r2dbc/releases/tag/v${version.value}"))
-    ),
+    releaseNotesURL := None,
     licenses := Seq(("BUSL-1.1", url("https://raw.githubusercontent.com/akka/akka-persistence-r2dbc/main/LICENSE"))),
-    description := "An Akka Persistence backed by SQL database with R2DBC",
-    // append -SNAPSHOT to version when isSnapshot
-    dynverSonatypeSnapshots := true))
+    description := "An Akka Persistence backed by SQL database with R2DBC (Reflek fork with connection pool scheduler fix)",
+    // Disable dynver for explicit version control
+    dynverSonatypeSnapshots := false))
 
 def common: Seq[Setting[_]] =
   Seq(

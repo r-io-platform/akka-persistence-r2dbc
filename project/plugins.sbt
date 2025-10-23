@@ -17,3 +17,6 @@ addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.9.3")
 // addSbtPlugin("com.github.sbt" % "sbt-site-paradox" % "1.7.0")
 
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.4")
+
+// For publishing to Google Cloud Artifact Registry
+addSbtPlugin("org.latestbit" % "sbt-gcs-plugin" % "1.15.1")

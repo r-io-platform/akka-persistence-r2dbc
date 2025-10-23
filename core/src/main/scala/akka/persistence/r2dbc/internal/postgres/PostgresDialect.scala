@@ -28,12 +28,16 @@ import io.r2dbc.spi.ConnectionFactoryOptions
 
 import akka.persistence.r2dbc.ConnectionFactoryProvider.ConnectionFactoryOptionsProvider
 import akka.persistence.r2dbc.internal.R2dbcExecutorProvider
+import org.slf4j.LoggerFactory
+import reactor.netty.resources.LoopResources
 
 /**
  * INTERNAL API
  */
 @InternalApi
 private[r2dbc] object PostgresDialect extends Dialect {
+
+  private val log = LoggerFactory.getLogger(getClass)
 
   override def name: String = "postgres"
 
@@ -117,6 +121,21 @@ private[r2dbc] object PostgresDialect extends Dialect {
       if (settings.sslPassword.nonEmpty)
         builder.option(PostgresqlConnectionFactoryProvider.SSL_PASSWORD, settings.sslPassword)
     }
+
+    // Create non-colocating LoopResources to distribute database I/O across multiple threads
+    // This fixes the event loop co-location bottleneck where all connections serialize on one thread
+    val poolMaxSize = config.getInt("max-size")
+    log.info(s"Creating LoopResources with $poolMaxSize threads (colocate=false) for connection pool")
+
+    val loopResources = LoopResources.create(
+      "r2dbc-postgres", // prefix for thread names
+      poolMaxSize, // selectCount (worker threads for I/O)
+      poolMaxSize, // workerCount (total worker threads)
+      false // colocate = false (KEY FIX: prevents all connections using same thread)
+    )
+
+    builder.option(PostgresqlConnectionFactoryProvider.LOOP_RESOURCES, loopResources)
+    log.info(s"Configured PostgreSQL ConnectionFactory with non-colocating LoopResources ($poolMaxSize threads)")
 
     val options = optionsProvider.buildOptions(builder, config)
     ConnectionFactories.get(options)

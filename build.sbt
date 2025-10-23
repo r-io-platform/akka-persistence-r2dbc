@@ -10,8 +10,8 @@ inThisBuild(
   Seq(
     organization := "io.reflek",
     organizationName := "Reflek Inc.",
-    // Custom version for Reflek fork with connection pool scheduler fix
-    version := "1.2.5-reflek-scheduler-fix",
+    // Custom version for Reflek fork with connection pool scheduler fix and non-colocating LoopResources
+    version := "1.2.6-reflek-no-colocate",
     homepage := Some(url("https://github.com/akka/akka-persistence-r2dbc")),
     scmInfo := Some(
       ScmInfo(
@@ -25,7 +25,7 @@ inThisBuild(
       url("https://github.com/akka/akka-persistence-r2dbc/graphs/contributors")),
     releaseNotesURL := None,
     licenses := Seq(("BUSL-1.1", url("https://raw.githubusercontent.com/akka/akka-persistence-r2dbc/main/LICENSE"))),
-    description := "An Akka Persistence backed by SQL database with R2DBC (Reflek fork with connection pool scheduler fix)",
+    description := "An Akka Persistence backed by SQL database with R2DBC (Reflek fork with scheduler fix and non-colocating event loops)",
     // Disable dynver for explicit version control
     dynverSonatypeSnapshots := false))
 
